@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm";
 import { User } from "../user/user.entity";
+import { Category } from "../category/category.entity";
 
 @Entity()
 export class Post {
@@ -20,4 +21,7 @@ export class Post {
 
     @ManyToOne(type => User, user => user.posts)
     user: User;
+
+    @ManyToOne(type => Category, category => category.posts)
+    category: Category;
 }

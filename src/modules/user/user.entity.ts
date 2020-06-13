@@ -3,7 +3,6 @@ import * as bcrypt from 'bcrypt';
 import { ExclusionMetadata } from "typeorm/metadata/ExclusionMetadata";
 import {Exclude} from 'class-transformer';
 import { Post } from "../post/post.entity";
-import { type } from "os";
 
 @Entity()
 export class User {
