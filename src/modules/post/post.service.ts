@@ -6,6 +6,7 @@ import { PostDto } from './post.dto';
 import { User } from '../user/user.entity';
 import { ListOptionsInterface } from '../../core/interfaces/list-options.interface';
 import { Tag } from '../tag/tag.entity';
+import { query } from 'express';
 
 @Injectable()
 export class PostService {
@@ -66,7 +67,9 @@ export class PostService {
         // });
         // return entities;
         console.log('options');
-        const {categories, tags} = options;
+        console.log(typeof options);
+
+        const {categories, tags, page, limit, sort, order} = options;
         const queryBuilder = await this.postRepository
         .createQueryBuilder('post');
 
@@ -82,7 +85,16 @@ export class PostService {
             queryBuilder.andWhere('tag.name IN (:...tags)', { tags });
         }
 
-        const entities = queryBuilder.getMany();
+        queryBuilder
+            .take(limit)
+            .skip(limit * (page - 1));
+
+        queryBuilder
+            .orderBy({
+                [`post.${sort}`]: order
+            });
+
+        const entities = queryBuilder.getManyAndCount();
         return entities; 
     }
 

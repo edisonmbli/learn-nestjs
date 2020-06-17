@@ -1,8 +1,9 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { ListOptionsInterface } from "../../../core/interfaces/list-options.interface";
 
-export const ListOptions = createParamDecorator((data: string, ctx: ExecutionContext) => {
+export const ListOptions = createParamDecorator((data: Partial<ListOptionsInterface> = {}, ctx: ExecutionContext) => {
     const req = ctx.switchToHttp().getRequest();
-    let { categories, tags } = req.query;
+    let { categories, tags, page, limit, sort, order } = req.query;
 
     if (categories) {
         categories = categories.split('-');
@@ -12,8 +13,42 @@ export const ListOptions = createParamDecorator((data: string, ctx: ExecutionCon
         tags = tags.split('-')
     }
 
+    if (page) {
+        page = parseInt(page);
+    } else {
+        page = 1;
+    }
+
+    if (limit) {
+        limit = parseInt(limit);
+    } else if ((limit === undefined) && data.limit) {
+        limit = data.limit;
+    } else {
+        limit = 2;
+    }
+
+    if (sort) {
+        sort = sort;
+    } else if ((sort == undefined) && data.sort) {
+        sort = data.sort;
+    } else {
+        sort = 'created';
+    }
+
+    if (order) {
+        order = order.toUpperCase();
+    } else if ((order === undefined) && data.order) {
+        order = data.order;
+    } else {
+        order = 'DESC';
+    }
+
     return {
         categories,
-        tags
+        tags,
+        page,
+        limit,
+        sort,
+        order
     }
 }); 
