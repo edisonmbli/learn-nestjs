@@ -6,10 +6,13 @@ import { Post } from './post.entity';
 import { AuthModule } from '../auth/auth.module';
 import { PassportModule } from '@nestjs/passport';
 import { Tag } from '../tag/tag.entity';
+import { UserService } from '../user/user.service';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     AuthModule,
+    UserModule,
     TypeOrmModule.forFeature([Post, Tag]),
   ],
   controllers: [PostController],
