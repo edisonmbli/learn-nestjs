@@ -21,7 +21,7 @@ import { FileModule } from './modules/file/file.module';
     TagModule,
     CommentModule,
     RoleModule,
-    FileModule
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

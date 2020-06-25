@@ -10,123 +10,120 @@ import { query } from 'express';
 
 @Injectable()
 export class PostService {
-    constructor(
-        @InjectRepository(Post)
-        private readonly postRepository: Repository<Post>,
+  constructor(
+    @InjectRepository(Post)
+    private readonly postRepository: Repository<Post>,
 
-        @InjectRepository(Tag)
-        private readonly tagRepository: Repository<Tag>
-    ){}
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
+  ) {}
 
-    async beforeTag(tags: Partial<Tag>[]) {
-        const _tags = tags.map(async item => {
-            const { id, name } = item;
+  async beforeTag(tags: Partial<Tag>[]) {
+    const _tags = tags.map(async item => {
+      const { id, name } = item;
 
-            if (id) {
-                const _tag = await this.tagRepository.findOne(id)
-                if (_tag) {
-                    return _tag;
-                }
-
-                return;
-            }
-
-            if (name) {
-                const _tag = await this.tagRepository.findOne({name});
-                if (_tag) {
-                    return _tag;
-                }
-
-                return await this.tagRepository.save(item);
-            }
-        });
-
-        return Promise.all(_tags);
-    }
-
-    async store(data: PostDto, user: User) {
-        console.log(user)
-        const { tags } = data;
-
-        if (tags) {
-            data.tags = await this.beforeTag(tags);
+      if (id) {
+        const _tag = await this.tagRepository.findOne(id);
+        if (_tag) {
+          return _tag;
         }
 
+        return;
+      }
 
-        const entity = await this.postRepository.create(data);
-        await this.postRepository.save({
-            ...entity,
-            user
-        });
-        return entity;
-    }
- 
-    async index(options: ListOptionsInterface) {
-        // const entities = await this.postRepository.find({
-        //     relations: ['user', 'category']
-        // });
-        // return entities;
-        console.log('options');
-        console.log(typeof options);
-
-        const {categories, tags, page, limit, sort, order} = options;
-        const queryBuilder = await this.postRepository
-        .createQueryBuilder('post');
-
-        queryBuilder.leftJoinAndSelect('post.user', 'user');
-        queryBuilder.leftJoinAndSelect('post.category', 'category');
-        queryBuilder.leftJoinAndSelect('post.tags', 'tag');
-
-        if (categories) {
-            queryBuilder.where('category.alias IN (:...categories)', { categories });
+      if (name) {
+        const _tag = await this.tagRepository.findOne({ name });
+        if (_tag) {
+          return _tag;
         }
 
-        if (tags) {
-            queryBuilder.andWhere('tag.name IN (:...tags)', { tags });
-        }
+        return await this.tagRepository.save(item);
+      }
+    });
 
-        queryBuilder
-            .take(limit)
-            .skip(limit * (page - 1));
+    return Promise.all(_tags);
+  }
 
-        queryBuilder
-            .orderBy({
-                [`post.${sort}`]: order
-            });
+  async store(data: PostDto, user: User) {
+    console.log(user);
+    const { tags } = data;
 
-        const entities = queryBuilder.getManyAndCount();
-        return entities; 
+    if (tags) {
+      data.tags = await this.beforeTag(tags);
     }
 
-    async show(id: string) {
-        const entity = await this.postRepository.findOne(id);
-        return entity;
+    const entity = await this.postRepository.create(data);
+    await this.postRepository.save({
+      ...entity,
+      user,
+    });
+    return entity;
+  }
+
+  async index(options: ListOptionsInterface) {
+    // const entities = await this.postRepository.find({
+    //     relations: ['user', 'category']
+    // });
+    // return entities;
+    console.log('options');
+    console.log(typeof options);
+
+    const { categories, tags, page, limit, sort, order } = options;
+    const queryBuilder = await this.postRepository.createQueryBuilder('post');
+
+    queryBuilder.leftJoinAndSelect('post.user', 'user');
+    queryBuilder.leftJoinAndSelect('post.category', 'category');
+    queryBuilder.leftJoinAndSelect('post.tags', 'tag');
+
+    if (categories) {
+      queryBuilder.where('category.alias IN (:...categories)', { categories });
     }
 
-    async update(id: string, data: Partial<PostDto>) {
-        const { tags } = data;
-        delete data.tags;
-
-        await this.postRepository.update(id, data);
-
-        const entity = await this.postRepository.findOne(id, { relations: ['category', 'tags']});
-        if (tags) {
-            entity.tags = await this.beforeTag(tags);
-        }
-
-        return await this.postRepository.save(entity);
+    if (tags) {
+      queryBuilder.andWhere('tag.name IN (:...tags)', { tags });
     }
 
-    async destroy(id: string) {
-        const result = await this.postRepository.delete(id);
-        return result;
+    queryBuilder.take(limit).skip(limit * (page - 1));
+
+    queryBuilder.orderBy({
+      [`post.${sort}`]: order,
+    });
+
+    const entities = queryBuilder.getManyAndCount();
+    return entities;
+  }
+
+  async show(id: string) {
+    const entity = await this.postRepository.findOne(id);
+    return entity;
+  }
+
+  async update(id: string, data: Partial<PostDto>) {
+    const { tags } = data;
+    delete data.tags;
+
+    await this.postRepository.update(id, data);
+
+    const entity = await this.postRepository.findOne(id, {
+      relations: ['category', 'tags'],
+    });
+    if (tags) {
+      entity.tags = await this.beforeTag(tags);
     }
 
-    async vote(id: number, user: User) {
-        await this.postRepository
-        .createQueryBuilder()
-        .relation(User, 'voted')
-        .of(user)
-        .add(id);
-    }
+    return await this.postRepository.save(entity);
+  }
+
+  async destroy(id: string) {
+    const result = await this.postRepository.delete(id);
+    return result;
+  }
+
+  async vote(id: number, user: User) {
+    await this.postRepository
+      .createQueryBuilder()
+      .relation(User, 'voted')
+      .of(user)
+      .add(id);
+  }
 }

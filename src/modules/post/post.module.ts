@@ -10,12 +10,8 @@ import { UserService } from '../user/user.service';
 import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [
-    AuthModule,
-    UserModule,
-    TypeOrmModule.forFeature([Post, Tag]),
-  ],
+  imports: [AuthModule, UserModule, TypeOrmModule.forFeature([Post, Tag])],
   controllers: [PostController],
-  providers: [PostService]
+  providers: [PostService],
 })
 export class PostModule {}

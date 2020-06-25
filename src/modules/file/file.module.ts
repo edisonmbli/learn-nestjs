@@ -11,10 +11,7 @@ import { File } from './file.entity';
     MulterModule.register({
       dest: './uploads',
       fileFilter: (req, file, callback) => {
-        const mimetypes = [
-          'image/png',
-          'image/jpg'
-        ];
+        const mimetypes = ['image/png', 'image/jpg'];
 
         const allowed = mimetypes.some(type => type === file.mimetype);
 
@@ -23,10 +20,10 @@ import { File } from './file.entity';
         } else {
           callback(new BadRequestException('不支持上传此类型的文件'), false);
         }
-      }
-    })
+      },
+    }),
   ],
   controllers: [FileController],
-  providers: [FileService]
+  providers: [FileService],
 })
 export class FileModule {}

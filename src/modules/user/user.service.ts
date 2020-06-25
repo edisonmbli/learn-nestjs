@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
@@ -6,93 +10,89 @@ import { UserDto, UpdatePasswordDto } from './user.dto';
 
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>
-    ) { }
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-    async store(data: UserDto) {
-        const { name } = data;
-        const user = await this.userRepository.findOne({ name });
+  async store(data: UserDto) {
+    const { name } = data;
+    const user = await this.userRepository.findOne({ name });
 
-        if (user) {
-            throw new BadRequestException('用户已经存在')
-        }
-
-        const entity = await this.userRepository.create(data);
-        await this.userRepository.save(entity);
-        return entity;
+    if (user) {
+      throw new BadRequestException('用户已经存在');
     }
 
-    async show(id: string) {
-        const entity = await this.userRepository.findOne(id, {
-            relations: ['posts']
-        });
+    const entity = await this.userRepository.create(data);
+    await this.userRepository.save(entity);
+    return entity;
+  }
 
-        if (!entity) {
-            throw new NotFoundException('没找到用户');
-        }
+  async show(id: string) {
+    const entity = await this.userRepository.findOne(id, {
+      relations: ['posts'],
+    });
 
-        return entity;
+    if (!entity) {
+      throw new NotFoundException('没找到用户');
     }
 
-    async updatePassword(id: string, data: UpdatePasswordDto) {
-        const { password, newPassword } = data;
+    return entity;
+  }
 
-        const entity = await this.userRepository.findOne(id);
-        if (!entity) {
-            throw new NotFoundException('没找到用户');
-        }
+  async updatePassword(id: string, data: UpdatePasswordDto) {
+    const { password, newPassword } = data;
 
-        const pass = await entity.comparePassword(password);
-        if (!pass) {
-            throw new BadRequestException('密码验证失败， 请重新输入正确密码');
-        }
-
-        entity.password = newPassword;
-        return await this.userRepository.save(entity);
+    const entity = await this.userRepository.findOne(id);
+    if (!entity) {
+      throw new NotFoundException('没找到用户');
     }
 
-    async findByName(name: string, password?: boolean) {
-        const queryBuilder = await this.userRepository.createQueryBuilder('user');
-
-        queryBuilder
-            .where('user.name = :name', { name })
-            .leftJoinAndSelect('user.roles', 'roles');
-
-        if (password) {
-            queryBuilder.addSelect('user.password');
-        }
-
-        const entity = queryBuilder.getOne();
-
-        return entity;
+    const pass = await entity.comparePassword(password);
+    if (!pass) {
+      throw new BadRequestException('密码验证失败， 请重新输入正确密码');
     }
 
-    async update(id: number, data: UserDto) {
-        const { roles } = data;
+    entity.password = newPassword;
+    return await this.userRepository.save(entity);
+  }
 
-        const entity = await this.userRepository.findOne(id);
+  async findByName(name: string, password?: boolean) {
+    const queryBuilder = await this.userRepository.createQueryBuilder('user');
 
-        if (roles) {
-            entity.roles = roles;
-        }
+    queryBuilder
+      .where('user.name = :name', { name })
+      .leftJoinAndSelect('user.roles', 'roles');
 
-        return await this.userRepository.save(entity);
+    if (password) {
+      queryBuilder.addSelect('user.password');
     }
 
-    async possess(
-        id: number,
-        resource: string,
-        resourceId: number
-    ) {
-        const result = await this.userRepository
-            .createQueryBuilder('user')
-            .where('user.id = :id', { id })
-            .leftJoin(`user.${resource}`, resource)
-            .andWhere(`${resource}.id = :resourceId`, { resourceId })
-            .getCount();
+    const entity = queryBuilder.getOne();
 
-        return result === 1 ? true : false;
+    return entity;
+  }
+
+  async update(id: number, data: UserDto) {
+    const { roles } = data;
+
+    const entity = await this.userRepository.findOne(id);
+
+    if (roles) {
+      entity.roles = roles;
     }
+
+    return await this.userRepository.save(entity);
+  }
+
+  async possess(id: number, resource: string, resourceId: number) {
+    const result = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .leftJoin(`user.${resource}`, resource)
+      .andWhere(`${resource}.id = :resourceId`, { resourceId })
+      .getCount();
+
+    return result === 1 ? true : false;
+  }
 }

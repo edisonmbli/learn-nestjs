@@ -11,21 +11,25 @@ import { Possession } from '../enums/possession.enum';
 export class AccessGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {}
 
   async validatePermissions(
     permissions: PermissionInterface[],
     user: User,
-    resourceId: number
+    resourceId: number,
   ) {
     const results = permissions.map(async permission => {
-      const {role, resource, possession} = permission;
-      let hasRole: boolean = true;
-      let hasPossession: boolean = true;
+      const { role, resource, possession } = permission;
+      let hasRole = true;
+      let hasPossession = true;
 
       if (possession === Possession.OWN) {
-        hasPossession = await this.userService.possess(user.id, resource, resourceId);
+        hasPossession = await this.userService.possess(
+          user.id,
+          resource,
+          resourceId,
+        );
       }
 
       if (role) {
@@ -33,26 +37,21 @@ export class AccessGuard implements CanActivate {
       }
 
       return hasRole && hasPossession;
-    })
+    });
 
     return Promise.all(results);
   }
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const permissions = this.reflector.get(
-      'permissions',
-      context.getHandler()
-    );
-    
+    const permissions = this.reflector.get('permissions', context.getHandler());
+
     const results = await this.validatePermissions(
       permissions,
       request.user,
-      parseInt(request.params.id)
+      parseInt(request.params.id),
     );
-    
+
     return results.includes(true);
   }
 }

@@ -12,15 +12,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtModule.register({
       secretOrPrivateKey: 'bnfuzfjduoghc#_iu24918uhgbdj=',
       signOptions: {
-        expiresIn: '12h'
-      }
+        expiresIn: '12h',
+      },
     }),
     PassportModule.register({
-      defaultStrategy: 'jwt'
-    })
+      defaultStrategy: 'jwt',
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
-  exports: [PassportModule]
+  exports: [PassportModule],
 })
 export class AuthModule {}

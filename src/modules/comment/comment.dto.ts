@@ -1,4 +1,4 @@
 export class CommentDto {
-    readonly title: string;
-    readonly body: string;
+  readonly title: string;
+  readonly body: string;
 }

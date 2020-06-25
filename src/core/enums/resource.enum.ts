@@ -1,4 +1,4 @@
 export enum Resource {
-    POST = 'posts',
-    COMMENT = 'comments'
+  POST = 'posts',
+  COMMENT = 'comments',
 }

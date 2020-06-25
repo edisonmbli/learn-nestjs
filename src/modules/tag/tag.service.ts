@@ -6,20 +6,20 @@ import { TagDto } from './tag.dto';
 
 @Injectable()
 export class TagService {
-    constructor(
-       @InjectRepository(Tag) 
-       private readonly tagRepository: Repository<Tag>
-    ) {}
+  constructor(
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
+  ) {}
 
-    async store(data: TagDto) {
-        return await this.tagRepository.save(data);
-    }
+  async store(data: TagDto) {
+    return await this.tagRepository.save(data);
+  }
 
-    async update(id: number, data: TagDto) {
-        return await this.tagRepository.update(id, data);
-    }
+  async update(id: number, data: TagDto) {
+    return await this.tagRepository.update(id, data);
+  }
 
-    async destroy(id: number) {
-        return await this.tagRepository.delete(id);
-    }
+  async destroy(id: number) {
+    return await this.tagRepository.delete(id);
+  }
 }

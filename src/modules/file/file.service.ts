@@ -6,16 +6,16 @@ import { File } from './file.entity';
 
 @Injectable()
 export class FileService {
-    constructor(
-        @InjectRepository(File)
-        private readonly fileRepository: Repository<File>
-    ) {}
+  constructor(
+    @InjectRepository(File)
+    private readonly fileRepository: Repository<File>,
+  ) {}
 
-    async store(data: FileDto) {
-        return await this.fileRepository.save(data);
-    }
+  async store(data: FileDto) {
+    return await this.fileRepository.save(data);
+  }
 
-    async show(id: number) {
-        return await this.fileRepository.findOne(id);
-    }
+  async show(id: number) {
+    return await this.fileRepository.findOne(id);
+  }
 }
